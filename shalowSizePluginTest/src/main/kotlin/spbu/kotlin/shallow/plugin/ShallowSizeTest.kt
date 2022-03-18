@@ -1,81 +1,44 @@
 package spbu.kotlin.shallow.plugin
 
 import org.junit.jupiter.api.Assertions.assertEquals
-import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import kotlin.reflect.full.memberFunctions
 
 const val DEFAULT_SIZE = 8
+const val BOOLEAN_SIZE = 1
 
-// TODO: rewrite to parameterized tests
 class AddShallowSizeMethodTest {
-    @Test
-    fun baseShallowTest() {
-        val x = BaseClass("Hello")
-        assertEquals(DEFAULT_SIZE, x.shallowSize())
+    @ParameterizedTest
+    @MethodSource("getShallowSizeTestData")
+    fun shallowSize(testingClass: Any, expectedSize: Int) {
+        require(testingClass::class.isData) { "the shallowSize method is present only in data classes" }
+
+        val shallowSizeMethod = testingClass::class.memberFunctions.find { it.name == "shallowSize" }!!
+        assertEquals(shallowSizeMethod.call(testingClass), expectedSize)
     }
 
-    @Test
-    fun internalModifierTest() {
-        val x = InternalClass(true)
-        assertEquals(1, x.shallowSize())
-    }
-
-    @Test
-    fun inheritInterfacesTest() {
-        val x = InheritInterfaces(3)
-        assertEquals(Int.SIZE_BYTES, x.shallowSize())
-    }
-
-    @Test
-    fun inheritClassTest() {
-        val x = InheritClass(3)
-        assertEquals(Int.SIZE_BYTES, x.shallowSize())
-    }
-
-    @Test
-    fun noBackFieldTest() {
-        val x = NoBackField('c')
-        assertEquals(2, x.shallowSize())
-    }
-
-    @Test
-    fun privateFieldsTest() {
-        val x = PrivateFields(3)
-        assertEquals(Long.SIZE_BYTES + Int.SIZE_BYTES, x.shallowSize())
-    }
-
-    @Test
-    fun multipleFieldsInConstructorTest() {
-        val x = MultipleFieldsInConstructor(1, 2, 3, 4)
-        assertEquals(Byte.SIZE_BYTES + Short.SIZE_BYTES + Int.SIZE_BYTES + Long.SIZE_BYTES, x.shallowSize())
-    }
-
-    @Test
-    fun nullablePrimitivesTest() {
-        val x = NullablePrimitives(1f, 1.0, 'c', true)
-        assertEquals(4 * DEFAULT_SIZE, x.shallowSize())
-    }
-
-    @Test
-    fun javaCharacterTest() {
-        val x = JavaCharacter(Character('3'))
-        assertEquals(DEFAULT_SIZE, x.shallowSize())
-    }
-
-    @Test
-    fun noExplicitTypeTest() {
-        val x = NoExplicitType(3)
-        assertEquals(Int.SIZE_BYTES + Long.SIZE_BYTES, x.shallowSize())
-    }
-
-    @Test
-    fun overrideFieldFromClassTest() {
-        val x = OverrideFieldFromClass(4)
-        assertEquals(Int.SIZE_BYTES, x.shallowSize())
-    }
-
-    @Test
-    fun overrideFieldFromInterfaceTest() {
-        val x = OverrideFieldFromInterface(4)
-        assertEquals(Int.SIZE_BYTES, x.shallowSize())
+    companion object {
+        @JvmStatic
+        fun getShallowSizeTestData() = listOf(
+            Arguments.of(BaseClass("Hello"), DEFAULT_SIZE),
+            Arguments.of(InternalClass(true), BOOLEAN_SIZE),
+            Arguments.of(InheritInterfaces(3), Int.SIZE_BYTES),
+            Arguments.of(NoBackField('c'), Char.SIZE_BYTES),
+            Arguments.of(PrivateFields(3), Long.SIZE_BYTES + Int.SIZE_BYTES),
+            Arguments.of(
+                MultipleFieldsInConstructor(1, 2, 3, 4),
+                Byte.SIZE_BYTES + Short.SIZE_BYTES + Int.SIZE_BYTES + Long.SIZE_BYTES
+            ),
+            Arguments.of(
+                NullablePrimitives(1f, 1.0, 'c', true),
+                4 * DEFAULT_SIZE
+            ),
+            Arguments.of(JavaCharacter(Character('3')), DEFAULT_SIZE),
+            Arguments.of(NoExplicitType(3), Int.SIZE_BYTES + Long.SIZE_BYTES),
+            Arguments.of(OverrideFieldFromClass(4), Int.SIZE_BYTES),
+            Arguments.of(OverrideFieldFromInterface(4), Int.SIZE_BYTES),
+        )
     }
 }

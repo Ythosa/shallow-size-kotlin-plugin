@@ -8,6 +8,7 @@ plugins {
 }
 
 dependencies {
+    implementation(kotlin("reflect"))
     implementation("junit:junit:4.13.2")
     implementation("org.junit.jupiter:junit-jupiter:5.8.2")
     testImplementation("org.junit.jupiter:junit-jupiter-api:5.8.2")
