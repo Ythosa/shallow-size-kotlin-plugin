@@ -55,18 +55,17 @@ val Meta.GenerateShallowSize: CliPlugin
     get() = "Generate shallowSize method" {
         meta(
             classDeclaration(this, { element.isData() }) { declaration ->
-                with(ShallowSizeSignature) {
-                    Transform.replace(
-                        replacing = declaration.element,
-                        newDeclaration = """
-                            $`@annotations`
-                            $visibility $modality $kind $name $`(typeParameters)` $`(params)` $superTypes {
-                            $body
-                                fun $name($parameters): $returnType = TODO()
-                            }
-                        """.trimIndent().`class`
-                    )
-                }
+                Transform.replace(
+                    replacing = declaration.element,
+                    newDeclaration = ShallowSizeSignature.let { signature ->
+                        """
+                        $`@annotations`
+                        $visibility $modality $kind $name $`(typeParameters)` $`(params)` $superTypes {
+                        $body
+                            fun ${signature.name}(${signature.parameters}): ${signature.returnType} = TODO()
+                        }""".trimIndent().`class`
+                    }
+                )
             },
             irClass { clazz ->
                 if (clazz.isData) clazz.functions.find { it.name.asString() == ShallowSizeSignature.name }!!
