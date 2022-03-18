@@ -1,3 +1,4 @@
+@file:Suppress("MagicNumber", "UnusedPrivateMember", "SerialVersionUIDInSerializableClass")
 package spbu.kotlin.shallow.plugin
 
 import java.io.Serializable
@@ -50,4 +51,3 @@ interface BaseInterface {
 data class OverrideFieldFromClass(override val openIntVal: Int) : Base(3)
 
 data class OverrideFieldFromInterface(override val intVal: Int) : BaseInterface
-

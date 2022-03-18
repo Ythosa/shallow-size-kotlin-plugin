@@ -1,3 +1,4 @@
+@file:Suppress("MagicNumber")
 package spbu.kotlin.shallow.plugin
 
 import org.junit.jupiter.api.Assertions.assertEquals
