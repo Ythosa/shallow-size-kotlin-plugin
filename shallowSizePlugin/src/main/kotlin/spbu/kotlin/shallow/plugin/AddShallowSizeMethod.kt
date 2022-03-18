@@ -3,22 +3,82 @@ package spbu.kotlin.shallow.plugin
 import arrow.meta.CliPlugin
 import arrow.meta.Meta
 import arrow.meta.invoke
+import arrow.meta.quotes.Transform
 import arrow.meta.quotes.classDeclaration
 import org.jetbrains.kotlin.ir.types.IrType
+import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
+import org.jetbrains.kotlin.ir.builders.irBlockBody
+import org.jetbrains.kotlin.ir.builders.irInt
+import org.jetbrains.kotlin.ir.builders.irReturn
+import org.jetbrains.kotlin.ir.types.isBoolean
+import org.jetbrains.kotlin.ir.types.isByte
+import org.jetbrains.kotlin.ir.types.isChar
+import org.jetbrains.kotlin.ir.types.isDouble
+import org.jetbrains.kotlin.ir.types.isFloat
+import org.jetbrains.kotlin.ir.types.isInt
+import org.jetbrains.kotlin.ir.types.isLong
+import org.jetbrains.kotlin.ir.types.isShort
+import org.jetbrains.kotlin.ir.types.isUByte
+import org.jetbrains.kotlin.ir.types.isULong
+import org.jetbrains.kotlin.ir.types.isUShort
+import org.jetbrains.kotlin.ir.types.isUnit
+import org.jetbrains.kotlin.ir.util.functions
+import org.jetbrains.kotlin.ir.util.properties
 
 const val DEFAULT_SIZE = 8
+const val BOOLEAN_SIZE = 1
+const val UNIT_SIZE = 8
 
-fun IrType.byteSize(): Int =
-    TODO("Calculate types for Char, Byte, Short, Int, Long, UByte, UShort, ULong, Float, Double, Boolean, Unit. For nullable and all other types use DEFAULT_SIZE value")
+fun IrType.byteSize(): Int = when {
+    this.isChar() -> Char.SIZE_BYTES
+    this.isByte() -> Byte.SIZE_BYTES
+    this.isShort() -> Short.SIZE_BYTES
+    this.isInt() -> Int.SIZE_BYTES
+    this.isLong() -> Long.SIZE_BYTES
+    this.isUByte() -> UByte.SIZE_BYTES
+    this.isUShort() -> UShort.SIZE_BYTES
+    this.isULong() -> ULong.SIZE_BYTES
+    this.isFloat() -> Float.SIZE_BYTES
+    this.isDouble() -> Double.SIZE_BYTES
+    this.isBoolean() -> BOOLEAN_SIZE
+    this.isUnit() -> UNIT_SIZE
+    else -> DEFAULT_SIZE
+}
+
+object ShallowSizeSignature {
+    const val name = "shallowSize"
+    const val parameters = ""
+    const val returnType = "Int"
+}
 
 val Meta.GenerateShallowSize: CliPlugin
     get() = "Generate shallowSize method" {
         meta(
-            classDeclaration(this, { TODO("Check if the current declaration is a data class") }) { declaration ->
-                TODO("Add new shallowSize function without implementation. Please, use arrow.meta.quotes.Transform.replace")
+            classDeclaration(this, { element.isData() }) { declaration ->
+                with(ShallowSizeSignature) {
+                    Transform.replace(
+                        replacing = declaration.element,
+                        newDeclaration = """
+                            $`@annotations`
+                            $visibility $modality $kind $name $`(typeParameters)` $`(params)` $superTypes {
+                            $body
+                                fun $name($parameters): $returnType = TODO()
+                            }
+                        """.trimIndent().`class`
+                    )
+                }
             },
             irClass { clazz ->
-                TODO("Only for data classes calculate the sum of sized its properties and replace the shallowSize function body, please use org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder, org.jetbrains.kotlin.ir.builders.irBlockBody, and org.jetbrains.kotlin.ir.builders.irInt to build new function body")
+                if (clazz.isData) clazz.functions.find { it.name.asString() == ShallowSizeSignature.name }!!
+                    .also { shallowSize ->
+                        DeclarationIrBuilder(pluginContext, shallowSize.symbol).irBlockBody {
+                            shallowSize.body = irBlockBody {
+                                +irReturn(
+                                    irInt(clazz.properties.mapNotNull { it.backingField?.type?.byteSize() }.sum())
+                                )
+                            }
+                        }
+                    }
                 clazz
             }
         )
