@@ -5,11 +5,11 @@ import arrow.meta.Meta
 import arrow.meta.invoke
 import arrow.meta.quotes.Transform
 import arrow.meta.quotes.classDeclaration
-import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
 import org.jetbrains.kotlin.ir.builders.irBlockBody
 import org.jetbrains.kotlin.ir.builders.irInt
 import org.jetbrains.kotlin.ir.builders.irReturn
+import org.jetbrains.kotlin.ir.types.IrType
 import org.jetbrains.kotlin.ir.types.isBoolean
 import org.jetbrains.kotlin.ir.types.isByte
 import org.jetbrains.kotlin.ir.types.isChar
@@ -63,7 +63,8 @@ val Meta.GenerateShallowSize: CliPlugin
                         $visibility $modality $kind $name $`(typeParameters)` $`(params)` $superTypes {
                         $body
                             fun ${signature.name}(${signature.parameters}): ${signature.returnType} = TODO()
-                        }""".trimIndent().`class`
+                        }
+                        """.trimIndent().`class`
                     }
                 )
             },

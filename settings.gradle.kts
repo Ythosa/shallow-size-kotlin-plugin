@@ -8,4 +8,4 @@ pluginManagement {
         kotlin("jvm") version kotlinVersion
     }
 }
-include("shalowSizePluginTest")
+include("shallowSizePluginTest")

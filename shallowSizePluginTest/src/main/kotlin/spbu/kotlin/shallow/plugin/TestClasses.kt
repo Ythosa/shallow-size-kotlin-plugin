@@ -1,4 +1,3 @@
-@file:Suppress("MagicNumber", "UnusedPrivateMember", "SerialVersionUIDInSerializableClass")
 package spbu.kotlin.shallow.plugin
 
 import java.io.Serializable
@@ -7,6 +6,7 @@ data class BaseClass(val stringVal: String)
 
 internal data class InternalClass(var booleanVal: Boolean)
 
+@Suppress("style.SerialVersionUIDInSerializableClass")
 data class InheritInterfaces(val x: Int) : Serializable, Runnable {
     override fun run() = TODO("Not yet implemented")
 }
@@ -20,6 +20,7 @@ data class NoBackField(val charVal: Char = 'a') {
         get() = 0
 }
 
+@Suppress("style.UnusedPrivateMember")
 data class PrivateFields(val longVal: Long) {
     private val intValWithoutGet: Int = 0
 }
