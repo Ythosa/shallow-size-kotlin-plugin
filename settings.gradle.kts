@@ -1,4 +1,4 @@
-rootProject.name = "shalowSize"
+rootProject.name = "shallowSize"
 
 include("shallowSizePlugin")
 
