@@ -69,8 +69,11 @@ val Meta.GenerateShallowSize: CliPlugin
                 )
             },
             irClass { clazz ->
-                if (clazz.isData) clazz.functions.find { it.name.asString() == ShallowSizeSignature.name }!!
-                    .also { shallowSize ->
+                if (clazz.isData) {
+                    val shallowSize = clazz.functions.find { it.name.asString() == ShallowSizeSignature.name }
+                        ?: throw ShallowSizePluginInternalError()
+
+                    shallowSize.also {
                         DeclarationIrBuilder(pluginContext, shallowSize.symbol).irBlockBody {
                             shallowSize.body = irBlockBody {
                                 +irReturn(
@@ -79,6 +82,7 @@ val Meta.GenerateShallowSize: CliPlugin
                             }
                         }
                     }
+                }
                 clazz
             }
         )
