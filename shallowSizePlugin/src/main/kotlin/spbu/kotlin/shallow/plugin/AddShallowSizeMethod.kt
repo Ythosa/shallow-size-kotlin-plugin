@@ -70,8 +70,9 @@ val Meta.GenerateShallowSize: CliPlugin
             },
             irClass { clazz ->
                 if (clazz.isData) {
-                    val shallowSize = clazz.functions.find { it.name.asString() == ShallowSizeSignature.name }
-                        ?: throw ShallowSizePluginInternalError()
+                    val shallowSize = clazz.functions.find {
+                        it.name.asString() == ShallowSizeSignature.name && it.valueParameters.isEmpty()
+                    } ?: throw ShallowSizePluginInternalError()
 
                     shallowSize.also {
                         DeclarationIrBuilder(pluginContext, shallowSize.symbol).irBlockBody {
