@@ -1,16 +1,41 @@
 name: ShallowSize
-on: [push, pull_request]
+on: [ push, pull_request ]
 jobs:
-  build:
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Run detekt
+        run: ./gradlew detekt
+      - name: Upload detekt report
+        uses: actions/upload-artifact@v3
+        with:
+          name: Detekt report
+          path: build/reports/detekt/
+
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
+      - name: Run JUnit
+        run: ./gradlew test
+      - name: Upload JUnit report
+        uses: actions/upload-artifact@v3
+        with:
+          name: Test report
+          path: shallowSizePluginTest/build/reports/tests/
+
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    needs: [ lint, test ]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v2
 
       - name: Build
         run: ./gradlew build
-
-      - name: Test
-        run: ./gradlew test
-
-      - name: Detekt
-        run: ./gradlew detekt
