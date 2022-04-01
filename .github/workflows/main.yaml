@@ -6,11 +6,11 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Run build
+      - name: Build
         run: ./gradlew build
 
-      - name: Run tests
+      - name: Test
         run: ./gradlew test
 
-      - name: Run detekt
+      - name: Detekt
         run: ./gradlew detekt

@@ -16,7 +16,8 @@ class AddShallowSizeMethodTest {
     fun shallowSize(testingClass: Any, expectedSize: Int) {
         require(testingClass::class.isData) { "the shallowSize method is present only in data classes" }
 
-        val shallowSizeMethod = testingClass::class.memberFunctions.find { it.name == "shallowSize" }!!
+        val shallowSizeMethod = testingClass::class.memberFunctions.find { it.name == "shallowSize" } ?:
+            throw IllegalArgumentException("provided data class does not have a shallowSize method")
         assertEquals(shallowSizeMethod.call(testingClass), expectedSize)
     }
 
