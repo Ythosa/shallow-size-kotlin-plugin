@@ -3,9 +3,9 @@ package spbu.kotlin.shallow.plugin
 import org.jetbrains.kotlin.ir.types.*
 
 object Sizes {
-    const val DEFAULT_SIZE = 8
-    const val BOOLEAN_SIZE = 1
-    const val UNIT_SIZE = 8
+    const val DEFAULT = 8
+    const val BOOLEAN = 1
+    const val UNIT = 8
 }
 
 fun IrType.byteSize(): Int = when {
@@ -19,7 +19,7 @@ fun IrType.byteSize(): Int = when {
     this.isULong() -> ULong.SIZE_BYTES
     this.isFloat() -> Float.SIZE_BYTES
     this.isDouble() -> Double.SIZE_BYTES
-    this.isBoolean() -> Sizes.BOOLEAN_SIZE
-    this.isUnit() -> Sizes.UNIT_SIZE
-    else -> Sizes.DEFAULT_SIZE
+    this.isBoolean() -> Sizes.BOOLEAN
+    this.isUnit() -> Sizes.UNIT
+    else -> Sizes.DEFAULT
 }
