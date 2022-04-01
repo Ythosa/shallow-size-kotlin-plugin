@@ -22,9 +22,9 @@ val Meta.GenerateShallowSize: CliPlugin
                         |$`@annotations`
                         |$visibility $modality $kind $name $`(typeParameters)` $`(params)` $superTypes {
                         |$body
-                        |   fun ${signature.name}(${signature.parameters}): ${signature.returnType} = TODO("
-                        |       method body must be provided by shallowSize plugin
-                        |   ")
+                        |   fun ${signature.name}(${signature.parameters}): ${signature.returnType} = TODO(
+                        |       "method body must be provided by shallowSize plugin"
+                        |   )
                         |}
                         """.trimIndent().`class`
                     }
