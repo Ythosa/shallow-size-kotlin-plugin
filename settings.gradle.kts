@@ -1,4 +1,4 @@
-rootProject.name = "shalowSize"
+rootProject.name = "shallowSize"
 
 include("shallowSizePlugin")
 
@@ -8,4 +8,4 @@ pluginManagement {
         kotlin("jvm") version kotlinVersion
     }
 }
-include("shalowSizePluginTest")
+include("shallowSizePluginTest")

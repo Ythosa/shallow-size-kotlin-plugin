@@ -3,22 +3,41 @@ package spbu.kotlin.shallow.plugin
 import arrow.meta.CliPlugin
 import arrow.meta.Meta
 import arrow.meta.invoke
+import arrow.meta.quotes.Transform
 import arrow.meta.quotes.classDeclaration
-import org.jetbrains.kotlin.ir.types.IrType
-
-const val DEFAULT_SIZE = 8
-
-fun IrType.byteSize(): Int =
-    TODO("Calculate types for Char, Byte, Short, Int, Long, UByte, UShort, ULong, Float, Double, Boolean, Unit. For nullable and all other types use DEFAULT_SIZE value")
+import org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder
+import org.jetbrains.kotlin.ir.builders.irExprBody
+import org.jetbrains.kotlin.ir.builders.irInt
+import org.jetbrains.kotlin.ir.util.functions
+import org.jetbrains.kotlin.ir.util.properties
 
 val Meta.GenerateShallowSize: CliPlugin
     get() = "Generate shallowSize method" {
         meta(
-            classDeclaration(this, { TODO("Check if the current declaration is a data class") }) { declaration ->
-                TODO("Add new shallowSize function without implementation. Please, use arrow.meta.quotes.Transform.replace")
+            classDeclaration(this, { element.isData() }) { declaration ->
+                Transform.replace(
+                    replacing = declaration.element,
+                    newDeclaration = ShallowSizeSignature.let { signature ->
+                        """
+                        |$`@annotations`
+                        |$visibility $modality $kind $name $`(typeParameters)` $`(params)` $superTypes {
+                        |$body
+                        |   fun ${signature.name}(${signature.parameters}): ${signature.returnType} = TODO(
+                        |       "method body must be provided by shallowSize plugin"
+                        |   )
+                        |}
+                        """.trimIndent().`class`
+                    }
+                )
             },
             irClass { clazz ->
-                TODO("Only for data classes calculate the sum of sized its properties and replace the shallowSize function body, please use org.jetbrains.kotlin.backend.common.lower.DeclarationIrBuilder, org.jetbrains.kotlin.ir.builders.irBlockBody, and org.jetbrains.kotlin.ir.builders.irInt to build new function body")
+                if (clazz.isData) {
+                    val shallowSize = clazz.functions.find { it.isShallowSizeFunction() }
+                        ?: throw ShallowSizePluginInternalError()
+                    val builder = DeclarationIrBuilder(pluginContext, shallowSize.symbol)
+                    val fieldsSize = clazz.properties.mapNotNull { it.backingField?.type?.byteSize() }.sum()
+                    shallowSize.body = builder.irExprBody(builder.irInt(fieldsSize))
+                }
                 clazz
             }
         )

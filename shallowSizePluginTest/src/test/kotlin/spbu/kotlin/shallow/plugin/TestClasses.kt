@@ -6,6 +6,7 @@ data class BaseClass(val stringVal: String)
 
 internal data class InternalClass(var booleanVal: Boolean)
 
+@Suppress("style.SerialVersionUIDInSerializableClass")
 data class InheritInterfaces(val x: Int) : Serializable, Runnable {
     override fun run() = TODO("Not yet implemented")
 }
@@ -19,6 +20,7 @@ data class NoBackField(val charVal: Char = 'a') {
         get() = 0
 }
 
+@Suppress("style.UnusedPrivateMember")
 data class PrivateFields(val longVal: Long) {
     private val intValWithoutGet: Int = 0
 }
@@ -50,4 +52,3 @@ interface BaseInterface {
 data class OverrideFieldFromClass(override val openIntVal: Int) : Base(3)
 
 data class OverrideFieldFromInterface(override val intVal: Int) : BaseInterface
-
